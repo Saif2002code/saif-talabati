@@ -587,7 +587,7 @@
     <!-- شريط الأدوات والبحث -->
     <div class="toolbar">
       <div class="filters">
-        <input type="search" id="searchInput" placeholder="ابحث برقم الطلب (PR-1024)، اسم الملزمة، الأستاذ، المرحلة..." oninput="renderOrders()" />
+        <input type="search" id="searchInput" placeholder="ابحث برقم الطلب (مثال: PR-1001)، اسم الملزمة، الأستاذ، المرحلة..." oninput="renderOrders()" />
         
         <select id="filterBranch" onchange="renderOrders()">
           <option value="all">كل المكتبات (الحر + حي العامل)</option>
@@ -758,77 +758,8 @@
       saif: { branch: "الإدارة العامة", shift: "عام", defaultName: "سيف (صاحب المطبعة)", role: "admin" }
     };
 
-    // بيانات تجريبية أولية مطابقة لواقع الملازم والمناهج في مكتبة الحر وحي العامل
-    const INITIAL_ORDERS = [
-      {
-        id: "PR-1024",
-        title: "ملزمة الرياضيات للسادس العلمي (الجزء الأول) — أ. حيدر",
-        branch: "مكتبة الحر",
-        creator: "أحمد (الحر - صباحي)",
-        shift: "الصباحي",
-        grade: "السادس الإعدادي",
-        workType: "طباعة ملازم كاملة",
-        qty: "200 نسخة",
-        printSpec: "A4 - ملون كامل - وجهين",
-        binding: "كبس حراري (كتاب)",
-        priority: "مستعجل",
-        dueDate: "2026-10-15T18:00",
-        fileLink: "مجلد ملازم 2026 / السادس العلمي / رياضيات_ج1_نهائي.pdf",
-        notes: "نفدت الكمية في الشفت الصباحي، يرجى تجهيز 50 نسخة أولية بشكل عاجل للشفت المسائي.",
-        status: "طلب جديد",
-        createdAt: "2026-10-15 09:30 ص",
-        history: [
-          { status: "طلب جديد", by: "أحمد (الحر - صباحي)", time: "2026-10-15 09:30 ص", note: "تم إنشاء الطلب وإرفاق ملف الـ PDF" }
-        ]
-      },
-      {
-        id: "PR-1023",
-        title: "ملزمة اللغة الإنكليزية للثالث المتوسط + دفتر واجبات",
-        branch: "مكتبة حي العامل",
-        creator: "مصطفى (حي العامل - صباحي)",
-        shift: "الصباحي",
-        grade: "الثالث المتوسط",
-        workType: "طباعة ملازم كاملة",
-        qty: "75 نسخة",
-        printSpec: "A4 - أسود وأبيض (غلاف ملون) - وجهين",
-        binding: "سبيرال + غلاف شفاف",
-        priority: "عادي",
-        dueDate: "2026-10-16T12:00",
-        fileLink: "مرفوع على التلكرام - قناة المطبعة الخاصة",
-        notes: "الغلاف كارتون 250 غرام مسلفن لماع.",
-        status: "قيد الطباعة",
-        createdAt: "2026-10-15 10:15 ص",
-        history: [
-          { status: "طلب جديد", by: "مصطفى (حي العامل - صباحي)", time: "2026-10-15 10:15 ص", note: "تسجيل الطلب" },
-          { status: "تم القبول", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 10:25 ص", note: "الملف واضح وجاهز للسحب" },
-          { status: "قيد الطباعة", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 11:00 ص", note: "بدأت طباعة المتن على ماكنة الإبسون" }
-        ]
-      },
-      {
-        id: "PR-1022",
-        title: "سحب كتاب العلوم للصف السادس الابتدائي (طبعة منقحة)",
-        branch: "مكتبة الحر",
-        creator: "حسين (الحر - مسائي)",
-        shift: "المسائي",
-        grade: "السادس الابتدائي",
-        workType: "سحب مناهج دراسية",
-        qty: "100 نسخة",
-        printSpec: "B5 - حجم كتاب وزاري - وجهين",
-        binding: "كبس حراري (كتاب)",
-        priority: "عادي",
-        dueDate: "2026-10-15T16:00",
-        fileLink: "ارشيف المناهج الوزارية / علوم_سادس_ابتدائي.pdf",
-        notes: "مسجل من شفت البارحة المسائي بانتظار استلام الشفت الصباحي.",
-        status: "تم التجهيز",
-        createdAt: "2026-10-14 08:20 م",
-        history: [
-          { status: "طلب جديد", by: "حسين (الحر - مسائي)", time: "2026-10-14 08:20 م", note: "طلب تجهيز للشفت الصباحي" },
-          { status: "تم القبول", by: "قاسم (مسؤول التجهيز)", time: "2026-10-14 08:40 م", note: "تم الاستلام" },
-          { status: "قيد الطباعة", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 08:30 ص", note: "جاري السحب والتجليد" },
-          { status: "تم التجهيز", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 12:10 م", note: "مكمل ومشدود رزم جاهز للنقل" }
-        ]
-      }
-    ];
+    // أرقام الطلبات التجريبية القديمة — تُحذف تلقائياً من أي بيانات محفوظة سابقاً
+    const DEMO_ORDER_IDS = ["PR-1022", "PR-1023", "PR-1024"];
 
     let orders = [];
     let currentUser = ROLES_CONFIG.qasim;
@@ -836,12 +767,10 @@
     // تشغيل النظام عند التحميل
     window.addEventListener("DOMContentLoaded", () => {
       const saved = localStorage.getItem("saif_talabati_orders");
-      if (saved) {
-        orders = JSON.parse(saved);
-      } else {
-        orders = INITIAL_ORDERS;
-        saveToStorage();
-      }
+      orders = saved ? JSON.parse(saved) : [];
+      // إزالة الطلبات الوهمية/التجريبية من أي بيانات محفوظة سابقاً
+      orders = orders.filter(o => !DEMO_ORDER_IDS.includes(o.id));
+      saveToStorage();
       handleRoleChange();
     });
 
