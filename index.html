@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سيف طلباتي | نظام إدارة طباعة المناهج والملازم التعليمية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* الهوية اللونية الأساسية: الأسود -> الأصفر -> الأحمر -> الأزرق */
+      --bg-black: #0a0a0c;
+      --bg-card: #121318;
+      --bg-surface: #1a1c23;
+      --border-color: #2a2d38;
+      
+      --color-yellow: #facc15;
+      --color-yellow-glow: rgba(250, 204, 21, 0.15);
+      
+      --color-red: #ef4444;
+      --color-red-glow: rgba(239, 68, 68, 0.15);
+      
+      --color-blue: #3b82f6;
+      --color-blue-glow: rgba(59, 130, 246, 0.15);
+
+      --color-green: #10b981;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-black);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    /* شريط التنقل العلوي */
+    header {
+      background-color: var(--bg-card);
+      border-bottom: 2px solid var(--color-yellow);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: var(--color-yellow);
+      color: var(--bg-black);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.4rem;
+      box-shadow: 0 0 12px var(--color-yellow-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--color-yellow);
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* محول الحسابات والشفتات */
+    .user-switcher {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface);
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .user-switcher label {
+      font-size: 0.85rem;
+      color: var(--color-yellow);
+      font-weight: 700;
+    }
+
+    select, input, textarea {
+      background-color: var(--bg-black);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--color-yellow);
+      box-shadow: 0 0 0 2px var(--color-yellow-glow);
+    }
+
+    /* الحاوية الرئيسية */
+    .container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 0 20px;
+      flex: 1;
+    }
+
+    /* شريط الإحصائيات السريعة */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+    }
+
+    .stat-card.yellow::before { background-color: var(--color-yellow); }
+    .stat-card.red::before { background-color: var(--color-red); }
+    .stat-card.blue::before { background-color: var(--color-blue); }
+
+    .stat-info h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-info .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .stat-card.yellow .stat-num { color: var(--color-yellow); }
+    .stat-card.red .stat-num { color: var(--color-red); }
+    .stat-card.blue .stat-num { color: var(--color-blue); }
+
+    /* أزرار التحكم والفلترة */
+    .toolbar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .filters input[type="search"] {
+      min-width: 240px;
+      flex: 1;
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .btn-yellow {
+      background-color: var(--color-yellow);
+      color: var(--bg-black);
+    }
+    .btn-yellow:hover { filter: brightness(1.1); }
+
+    .btn-red {
+      background-color: var(--color-red);
+      color: #fff;
+    }
+    .btn-red:hover { filter: brightness(1.1); }
+
+    .btn-blue {
+      background-color: var(--color-blue);
+      color: #fff;
+    }
+    .btn-blue:hover { filter: brightness(1.1); }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+    .btn-outline:hover {
+      border-color: var(--color-yellow);
+      color: var(--color-yellow);
+    }
+
+    /* شبكة الطلبات */
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 18px;
+    }
+
+    .order-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .order-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-blue);
+    }
+
+    .order-card.urgent {
+      border-color: var(--color-red);
+      box-shadow: 0 0 15px var(--color-red-glow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .order-id {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--color-yellow);
+      letter-spacing: 0.5px;
+    }
+
+    .badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .badge-new { background: var(--color-yellow-glow); color: var(--color-yellow); border: 1px solid var(--color-yellow); }
+    .badge-accepted { background: var(--color-blue-glow); color: var(--color-blue); border: 1px solid var(--color-blue); }
+    .badge-printing { background: var(--color-blue); color: #fff; }
+    .badge-ready { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; }
+    .badge-delivering { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
+    .badge-received { background: #1f2937; color: #9ca3af; border: 1px solid #374151; }
+    .badge-clarify { background: var(--color-red-glow); color: var(--color-red); border: 1px solid var(--color-red); }
+    .badge-cancelled { background: #3f1d1d; color: #fca5a5; }
+
+    .badge-urgent {
+      background: var(--color-red);
+      color: #fff;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    .order-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .order-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--bg-surface);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+    }
+
+    .order-meta div span {
+      color: var(--text-muted);
+      display: block;
+      font-size: 0.75rem;
+    }
+
+    .order-meta div strong {
+      color: var(--text-main);
+    }
+
+    /* شريط تقدم المراحل الـ 6 */
+    .progress-steps {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .step-bar {
+      height: 6px;
+      border-radius: 4px;
+      background: var(--border-color);
+      transition: 0.3s;
+    }
+
+    .step-bar.done { background: var(--color-blue); }
+    .step-bar.current { background: var(--color-yellow); }
+    .step-bar.issue { background: var(--color-red); }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .card-actions .btn {
+      flex: 1;
+      justify-content: center;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+    }
+
+    /* النوافذ المنبثقة Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 200;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--color-yellow);
+      border-radius: 14px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-header h2 {
+      color: var(--color-yellow);
+      font-size: 1.2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* سجل التغييرات الزمني داخل التفاصيل */
+    .timeline {
+      margin-top: 15px;
+      border-right: 2px solid var(--color-blue);
+      padding-right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      position: relative;
+      background: var(--bg-surface);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      right: -20px;
+      top: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-yellow);
+      border: 2px solid var(--bg-black);
+    }
+
+    .shift-handover-banner {
+      background: linear-gradient(90deg, rgba(250,204,21,0.12), rgba(59,130,246,0.12));
+      border: 1px solid var(--color-yellow);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      background: var(--bg-card);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 640px) {
+      header { padding: 12px; }
+      .orders-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- الشريط العلوي -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">س</div>
+      <div class="brand-text">
+        <h1>سيف طلباتي — المناهج والملازم</h1>
+        <p>نظام الربط الموحد: مكتبة الحر • مكتبة حي العامل • المطبعة (قاسم)</p>
+      </div>
+    </div>
+
+    <!-- محاكي تسجيل الدخول وتبديل الشفتات -->
+    <div class="user-switcher">
+      <label for="activeRole">الحساب الفعّال الآن:</label>
+      <select id="activeRole" onchange="handleRoleChange()">
+        <option value="hur_morning">موظف مكتبة الحر (الشفت الصباحي)</option>
+        <option value="hur_evening">موظف مكتبة الحر (الشفت المسائي)</option>
+        <option value="amel_morning">موظف مكتبة حي العامل (الشفت الصباحي)</option>
+        <option value="amel_evening">موظف مكتبة حي العامل (الشفت المسائي)</option>
+        <option value="qasim" selected>قاسم — مسؤول تجهيز المطبعة</option>
+        <option value="saif">سيف — الإدارة العامة والرقابة</option>
+      </select>
+      <input type="text" id="workerNameInput" placeholder="اسم الموظف المستلم..." style="width: 150px;" onchange="updateWorkerName()" />
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- تنبيه تسليم الشفتات لمنع ضياع الطلبات -->
+    <div class="shift-handover-banner" id="shiftBanner">
+      <div>
+        <strong style="color: var(--color-yellow);">📌 ملخص تسليم الشفت الحي:</strong>
+        <span id="shiftSummaryText">يتم عرض كافة الطلبات المعلقة التي لم يؤكد استلامها بعد لمنع ضياعها بين الشفت الصباحي والمسائي.</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" onclick="exportBackup()">⬇️ حفظ نسخة (JSON)</button>
+        <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">⬆️ استيراد بيانات</button>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)" />
+      </div>
+    </div>
+
+    <!-- لوحة الإحصائيات السريعة -->
+    <div class="stats-grid">
+      <div class="stat-card yellow">
+        <div class="stat-info">
+          <h3>طلبات جديدة (بانتظار قاسم)</h3>
+          <div class="stat-num" id="statNew">0</div>
+        </div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-info">
+          <h3>قيد الطباعة والتجهيز</h3>
+          <div class="stat-num" id="statPrinting">0</div>
+        </div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-info">
+          <h3>جاهزة أو قيد التوصيل للمكتبة</h3>
+          <div class="stat-num" id="statReady">0</div>
+        </div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-info">
+          <h3>مستعجلة / تحتاج توضيح أو متأخرة</h3>
+          <div class="stat-num" id="statAlert">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- شريط الأدوات والبحث -->
+    <div class="toolbar">
+      <div class="filters">
+        <input type="search" id="searchInput" placeholder="ابحث برقم الطلب (PR-1024)، اسم الملزمة، الأستاذ، المرحلة..." oninput="renderOrders()" />
+        
+        <select id="filterBranch" onchange="renderOrders()">
+          <option value="all">كل المكتبات (الحر + حي العامل)</option>
+          <option value="مكتبة الحر">مكتبة الحر فقط</option>
+          <option value="مكتبة حي العامل">مكتبة حي العامل فقط</option>
+        </select>
+
+        <select id="filterStatus" onchange="renderOrders()">
+          <option value="all">جميع الحالات</option>
+          <option value="active_only">الطلبات النشطة غير المستلمة فقط</option>
+          <option value="طلب جديد">01 - طلب جديد</option>
+          <option value="تم القبول">02 - تم القبول</option>
+          <option value="قيد الطباعة">03 - قيد الطباعة</option>
+          <option value="تم التجهيز">04 - تم التجهيز</option>
+          <option value="قيد التوصيل">05 - قيد التوصيل</option>
+          <option value="تم الاستلام">06 - تم الاستلام</option>
+          <option value="يحتاج إلى توضيح">⚠️ يحتاج إلى توضيح</option>
+          <option value="ملغي">✖ ملغي</option>
+        </select>
+      </div>
+
+      <button class="btn btn-yellow" id="newOrderBtn" onclick="openNewOrderModal()">
+        ➕ تسجيل طلب ملزمة / منهج جديد
+      </button>
+    </div>
+
+    <!-- قائمة البطاقات -->
+    <div class="orders-grid" id="ordersContainer"></div>
+  </div>
+
+  <!-- نافذة إنشاء طلب جديد -->
+  <div class="modal-backdrop" id="newOrderModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📚 تسجيل طلب طباعة (ملازم ومناهج تعليمية)</h2>
+        <button class="btn btn-outline" onclick="closeModal('newOrderModal')">إغلاق ✕</button>
+      </div>
+      <form id="orderForm" onsubmit="saveNewOrder(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>المكتبة الطالبة</label>
+            <select id="fBranch" required>
+              <option value="مكتبة الحر">مكتبة الحر</option>
+              <option value="مكتبة حي العامل">مكتبة حي العامل</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>الشفت الحالي</label>
+            <select id="fShift" required>
+              <option value="الصباحي">الشفت الصباحي</option>
+              <option value="المسائي">الشفت المسائي</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>اسم الموظف المسجّل للطلب</label>
+            <input type="text" id="fCreator" required placeholder="مثال: أحمد / علي..." />
+          </div>
+          <div class="form-group">
+            <label>الأولوية</label>
+            <select id="fPriority">
+              <option value="عادي">عادي</option>
+              <option value="مستعجل">🚨 مستعجل (طالب ينتظر / نفاد كمية)</option>
+            </select>
+          </div>
+
+          <div class="form-group full">
+            <label>عنوان الملزمة / الكتاب المنهجي واسم الأستاذ</label>
+            <input type="text" id="fTitle" required placeholder="مثال: ملزمة الفيزياء للسادس العلمي - أ. محمد حسن (الجزء الأول)" />
+          </div>
+
+          <div class="form-group">
+            <label>المرحلة الدراسية</label>
+            <select id="fGrade">
+              <option value="السادس الإعدادي">السادس الإعدادي</option>
+              <option value="الثالث المتوسط">الثالث المتوسط</option>
+              <option value="السادس الابتدائي">السادس الابتدائي</option>
+              <option value="مراحل غير منتهية">مراحل غير منتهية (متوسطة/إعدادية)</option>
+              <option value="ملازم جامعية / كليات">ملازم جامعية / كليات</option>
+              <option value="قرطاسية وسجلات مدرسية">قرطاسية وسجلات مدرسية</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>نوع العمل</label>
+            <select id="fWorkType">
+              <option value="طباعة ملازم كاملة">طباعة ملازم كاملة</option>
+              <option value="سحب مناهج دراسية">سحب مناهج دراسية</option>
+              <option value="طباعة أغلفة ملازم فقط">طباعة أغلفة ملازم فقط</option>
+              <option value="تجليد وتغليف">تجليد وتغليف (سبيرال / حراري)</option>
+              <option value="تصوير مستندات وأسئلة">تصوير مستندات وأسئلة امتحانية</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>الكمية المطلوبة (عدد النسخ)</label>
+            <input type="number" id="fQty" min="1" value="50" required />
+          </div>
+
+          <div class="form-group">
+            <label>مواصفات الورق والطباعة</label>
+            <select id="fPrintSpec">
+              <option value="A4 - ملون كامل - وجهين">A4 - ملون كامل - وجهين</option>
+              <option value="A4 - أسود وأبيض (غلاف ملون) - وجهين">A4 - أسود وأبيض (غلاف ملون) - وجهين</option>
+              <option value="A4 - ملون - وجه واحد">A4 - ملون - وجه واحد</option>
+              <option value="B5 - حجم كتاب وزاري - وجهين">B5 - حجم كتاب وزاري - وجهين</option>
+              <option value="A3 - خرائط وملخصات">A3 - خرائط وملخصات</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>نوع التجليد والتشطيب</label>
+            <select id="fBinding">
+              <option value="سبيرال حديد / بلاستيك + شفاف">سبيرال + غلاف شفاف</option>
+              <option value="كبس حراري (كتاب)">كبس حراري (كعب كتاب)</option>
+              <option value="غلاف كارتون مسلفن لماع">غلاف كارتون مسلفن لماع</option>
+              <option value="كبس زاوية فقط">كبس زاوية فقط</option>
+              <option value="بدون تجليد (ورق فرط)">بدون تجليد (ورق فرط)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>موعد التسليم المطلوب للمكتبة</label>
+            <input type="datetime-local" id="fDueDate" required />
+          </div>
+
+          <div class="form-group full">
+            <label>رابط الملف (Google Drive / Telegram) أو اسم الملف المرفق في حاسبة المطبعة</label>
+            <input type="text" id="fFileLink" placeholder="مثال: مرفوع على كوكل درايف فولدر السادس العلمي / أو رابط التلكرام..." />
+          </div>
+
+          <div class="form-group full">
+            <label>ملاحظات خاصة لقاسم أو للشفت القادم</label>
+            <textarea id="fNotes" rows="2" placeholder="مثال: يرجى تدقيق تسلسل الصفحات قبل السحب، الغلاف موجود في ملف منفصل..."></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('newOrderModal')">إلغاء</button>
+          <button type="submit" class="btn btn-yellow">🚀 إرسال الطلب إلى قاسم</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة تفاصيل الطلب وسجل التتبع -->
+  <div class="modal-backdrop" id="detailsModal">
+    <div class="modal" id="detailsModalContent"></div>
+  </div>
+
+  <script>
+    // المراحل الأساسية لدورة حياة الطلب
+    const ORDER_STAGES = [
+      "طلب جديد",
+      "تم القبول",
+      "قيد الطباعة",
+      "تم التجهيز",
+      "قيد التوصيل",
+      "تم الاستلام"
+    ];
+
+    // معلومات الحسابات الافتراضية
+    const ROLES_CONFIG = {
+      hur_morning: { branch: "مكتبة الحر", shift: "الصباحي", defaultName: "أحمد (الحر - صباحي)", role: "worker" },
+      hur_evening: { branch: "مكتبة الحر", shift: "المسائي", defaultName: "حسين (الحر - مسائي)", role: "worker" },
+      amel_morning: { branch: "مكتبة حي العامل", shift: "الصباحي", defaultName: "مصطفى (حي العامل - صباحي)", role: "worker" },
+      amel_evening: { branch: "مكتبة حي العامل", shift: "المسائي", defaultName: "علي (حي العامل - مسائي)", role: "worker" },
+      qasim: { branch: "المطبعة المركزية", shift: "عام", defaultName: "قاسم (مسؤول التجهيز)", role: "qasim" },
+      saif: { branch: "الإدارة العامة", shift: "عام", defaultName: "سيف (صاحب المطبعة)", role: "admin" }
+    };
+
+    // بيانات تجريبية أولية مطابقة لواقع الملازم والمناهج في مكتبة الحر وحي العامل
+    const INITIAL_ORDERS = [
+      {
+        id: "PR-1024",
+        title: "ملزمة الرياضيات للسادس العلمي (الجزء الأول) — أ. حيدر",
+        branch: "مكتبة الحر",
+        creator: "أحمد (الحر - صباحي)",
+        shift: "الصباحي",
+        grade: "السادس الإعدادي",
+        workType: "طباعة ملازم كاملة",
+        qty: "200 نسخة",
+        printSpec: "A4 - ملون كامل - وجهين",
+        binding: "كبس حراري (كتاب)",
+        priority: "مستعجل",
+        dueDate: "2026-10-15T18:00",
+        fileLink: "مجلد ملازم 2026 / السادس العلمي / رياضيات_ج1_نهائي.pdf",
+        notes: "نفدت الكمية في الشفت الصباحي، يرجى تجهيز 50 نسخة أولية بشكل عاجل للشفت المسائي.",
+        status: "طلب جديد",
+        createdAt: "2026-10-15 09:30 ص",
+        history: [
+          { status: "طلب جديد", by: "أحمد (الحر - صباحي)", time: "2026-10-15 09:30 ص", note: "تم إنشاء الطلب وإرفاق ملف الـ PDF" }
+        ]
+      },
+      {
+        id: "PR-1023",
+        title: "ملزمة اللغة الإنكليزية للثالث المتوسط + دفتر واجبات",
+        branch: "مكتبة حي العامل",
+        creator: "مصطفى (حي العامل - صباحي)",
+        shift: "الصباحي",
+        grade: "الثالث المتوسط",
+        workType: "طباعة ملازم كاملة",
+        qty: "75 نسخة",
+        printSpec: "A4 - أسود وأبيض (غلاف ملون) - وجهين",
+        binding: "سبيرال + غلاف شفاف",
+        priority: "عادي",
+        dueDate: "2026-10-16T12:00",
+        fileLink: "مرفوع على التلكرام - قناة المطبعة الخاصة",
+        notes: "الغلاف كارتون 250 غرام مسلفن لماع.",
+        status: "قيد الطباعة",
+        createdAt: "2026-10-15 10:15 ص",
+        history: [
+          { status: "طلب جديد", by: "مصطفى (حي العامل - صباحي)", time: "2026-10-15 10:15 ص", note: "تسجيل الطلب" },
+          { status: "تم القبول", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 10:25 ص", note: "الملف واضح وجاهز للسحب" },
+          { status: "قيد الطباعة", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 11:00 ص", note: "بدأت طباعة المتن على ماكنة الإبسون" }
+        ]
+      },
+      {
+        id: "PR-1022",
+        title: "سحب كتاب العلوم للصف السادس الابتدائي (طبعة منقحة)",
+        branch: "مكتبة الحر",
+        creator: "حسين (الحر - مسائي)",
+        shift: "المسائي",
+        grade: "السادس الابتدائي",
+        workType: "سحب مناهج دراسية",
+        qty: "100 نسخة",
+        printSpec: "B5 - حجم كتاب وزاري - وجهين",
+        binding: "كبس حراري (كتاب)",
+        priority: "عادي",
+        dueDate: "2026-10-15T16:00",
+        fileLink: "ارشيف المناهج الوزارية / علوم_سادس_ابتدائي.pdf",
+        notes: "مسجل من شفت البارحة المسائي بانتظار استلام الشفت الصباحي.",
+        status: "تم التجهيز",
+        createdAt: "2026-10-14 08:20 م",
+        history: [
+          { status: "طلب جديد", by: "حسين (الحر - مسائي)", time: "2026-10-14 08:20 م", note: "طلب تجهيز للشفت الصباحي" },
+          { status: "تم القبول", by: "قاسم (مسؤول التجهيز)", time: "2026-10-14 08:40 م", note: "تم الاستلام" },
+          { status: "قيد الطباعة", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 08:30 ص", note: "جاري السحب والتجليد" },
+          { status: "تم التجهيز", by: "قاسم (مسؤول التجهيز)", time: "2026-10-15 12:10 م", note: "مكمل ومشدود رزم جاهز للنقل" }
+        ]
+      }
+    ];
+
+    let orders = [];
+    let currentUser = ROLES_CONFIG.qasim;
+
+    // تشغيل النظام عند التحميل
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = localStorage.getItem("saif_talabati_orders");
+      if (saved) {
+        orders = JSON.parse(saved);
+      } else {
+        orders = INITIAL_ORDERS;
+        saveToStorage();
+      }
+      handleRoleChange();
+    });
+
+    function saveToStorage() {
+      localStorage.setItem("saif_talabati_orders", JSON.stringify(orders));
+    }
+
+    function getNowFormatted() {
+      const now = new Date();
+      return now.toLocaleDateString("ar-IQ") + " " + now.toLocaleTimeString("ar-IQ", { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function handleRoleChange() {
+      const roleKey = document.getElementById("activeRole").value;
+      currentUser = { ...ROLES_CONFIG[roleKey], key: roleKey };
+      document.getElementById("workerNameInput").value = currentUser.defaultName;
+
+      // ضبط فلتر المكتبة تلقائياً إذا كان المستخدم عاملاً في إحدى المكتبتين
+      const branchSelect = document.getElementById("filterBranch");
+      if (currentUser.role === "worker") {
+        branchSelect.value = currentUser.branch;
+      } else {
+        branchSelect.value = "all";
+      }
+
+      renderOrders();
+    }
+
+    function updateWorkerName() {
+      const val = document.getElementById("workerNameInput").value.trim();
+      if (val) currentUser.defaultName = val;
+    }
+
+    function getBadgeClass(status) {
+      switch (status) {
+        case "طلب جديد": return "badge-new";
+        case "تم القبول": return "badge-accepted";
+        case "قيد الطباعة": return "badge-printing";
+        case "تم التجهيز": return "badge-ready";
+        case "قيد التوصيل": return "badge-delivering";
+        case "تم الاستلام": return "badge-received";
+        case "يحتاج إلى توضيح": return "badge-clarify";
+        case "ملغي": return "badge-cancelled";
+        default: return "badge-new";
+      }
+    }
+
+    // تحديث الإحصائيات العلوية
+    function updateStats() {
+      const scopeOrders = currentUser.role === "worker"
+        ? orders.filter(o => o.branch === currentUser.branch)
+        : orders;
+
+      document.getElementById("statNew").textContent = scopeOrders.filter(o => o.status === "طلب جديد").length;
+      document.getElementById("statPrinting").textContent = scopeOrders.filter(o => o.status === "تم القبول" || o.status === "قيد الطباعة").length;
+      document.getElementById("statReady").textContent = scopeOrders.filter(o => o.status === "تم التجهيز" || o.status === "قيد التوصيل").length;
+      document.getElementById("statAlert").textContent = scopeOrders.filter(o => (o.priority === "مستعجل" && o.status !== "تم الاستلام") || o.status === "يحتاج إلى توضيح").length;
+
+      // تحديث شريط الشفتات
+      const pendingDelivery = scopeOrders.filter(o => o.status === "تم التجهيز" || o.status === "قيد التوصيل").length;
+      const needClarify = scopeOrders.filter(o => o.status === "يحتاج إلى توضيح").length;
+      document.getElementById("shiftSummaryText").innerHTML =
+        `يوجد حالياً <strong>(${pendingDelivery})</strong> طلبات جاهزة/في الطريق تنتظر تأكيد الاستلام، و<strong>(${needClarify})</strong> طلبات تنتظر توضيحاً من المكتبة.`;
+    }
+
+    // رسم البطاقات
+    function renderOrders() {
+      updateStats();
+      const container = document.getElementById("ordersContainer");
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+      const branchFilter = document.getElementById("filterBranch").value;
+      const statusFilter = document.getElementById("filterStatus").value;
+
+      const filtered = orders.filter(order => {
+        const matchesSearch =
+          order.id.toLowerCase().includes(search) ||
+          order.title.toLowerCase().includes(search) ||
+          order.grade.toLowerCase().includes(search) ||
+          order.creator.toLowerCase().includes(search);
+
+        const matchesBranch = branchFilter === "all" || order.branch === branchFilter;
+
+        let matchesStatus = true;
+        if (statusFilter === "active_only") {
+          matchesStatus = order.status !== "تم الاستلام" && order.status !== "ملغي";
+        } else if (statusFilter !== "all") {
+          matchesStatus = order.status === statusFilter;
+        }
+
+        return matchesSearch && matchesBranch && matchesStatus;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">لا توجد طلبات مطابقة للبحث أو الفلتر المحدد حالياً.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(order => {
+        const stageIdx = ORDER_STAGES.indexOf(order.status);
+        const progressHtml = ORDER_STAGES.map((st, idx) => {
+          let cls = "step-bar";
+          if (order.status === "يحتاج إلى توضيح" || order.status === "ملغي") {
+            if (idx === 0) cls += " issue";
+          } else if (idx < stageIdx) {
+            cls += " done";
+          } else if (idx === stageIdx) {
+            cls += " current";
+          }
+          return `<div class="${cls}" title="${st}"></div>`;
+        }).join("");
+
+        return `
+          <div class="order-card ${order.priority === 'مستعجل' && order.status !== 'تم الاستلام' ? 'urgent' : ''}">
+            <div>
+              <div class="card-header">
+                <div>
+                  <span class="order-id">${order.id}</span>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">${order.createdAt}</div>
+                </div>
+                <div class="badges">
+                  ${order.priority === "مستعجل" ? `<span class="badge badge-urgent">مستعجل</span>` : ""}
+                  <span class="badge ${getBadgeClass(order.status)}">${order.status}</span>
+                </div>
+              </div>
+
+              <div style="margin-top:10px;">
+                <div class="order-title">${order.title}</div>
+                <div class="progress-steps">${progressHtml}</div>
+              </div>
+
+              <div class="order-meta" style="margin-top:12px;">
+                <div><span>المكتبة والشفت:</span><strong>${order.branch} (${order.shift})</strong></div>
+                <div><span>الكمية المطلوبة:</span><strong style="color:var(--color-yellow);">${order.qty}</strong></div>
+                <div><span>المرحلة / العمل:</span><strong>${order.grade}</strong></div>
+                <div><span>التجليد والورق:</span><strong>${order.binding}</strong></div>
+              </div>
+
+              ${order.notes ? `<div style="margin-top:10px; font-size:0.8rem; color:#d1d5db; background:#161821; padding:8px 10px; border-radius:6px; border-right:3px solid var(--color-yellow);">💬 ${order.notes}</div>` : ""}
+            </div>
+
+            <div class="card-actions">
+              ${renderRoleActions(order)}
+              <button class="btn btn-outline" onclick="openDetailsModal('${order.id}')">📋 السجل والتفاصيل</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // أزرار التحكم الذكية حسب صلاحية المستخدم وحالة الطلب
+    function renderRoleActions(order) {
+      const role = currentUser.role;
+      const st = order.status;
+      let btns = "";
+
+      // صلاحيات قاسم والإدارة العامة
+      if (role === "qasim" || role === "admin") {
+        if (st === "طلب جديد" || st === "يحتاج إلى توضيح") {
+          btns += `<button class="btn btn-yellow" onclick="changeOrderStatus('${order.id}', 'تم القبول')">✅ قبول الطلب</button>`;
+          btns += `<button class="btn btn-red" onclick="promptOrderNote('${order.id}', 'يحتاج إلى توضيح', 'اكتب ما ينقص الطلب ليظهر لموظف المكتبة:')">❓ طلب توضيح</button>`;
+        } else if (st === "تم القبول") {
+          btns += `<button class="btn btn-blue" onclick="changeOrderStatus('${order.id}', 'قيد الطباعة')">🖨️ بدء الطباعة</button>`;
+        } else if (st === "قيد الطباعة") {
+          btns += `<button class="btn btn-yellow" onclick="changeOrderStatus('${order.id}', 'تم التجهيز')">📦 اكتمال التجهيز</button>`;
+        } else if (st === "تم التجهيز") {
+          btns += `<button class="btn btn-blue" onclick="changeOrderStatus('${order.id}', 'قيد التوصيل')">🚚 إرسال للتوصيل</button>`;
+        }
+      }
+
+      // صلاحيات موظف المكتبة والإدارة العامة
+      if (role === "worker" || role === "admin") {
+        if (st === "تم التجهيز" || st === "قيد التوصيل") {
+          btns += `<button class="btn btn-yellow" onclick="changeOrderStatus('${order.id}', 'تم الاستلام')">✔️ تأكيد وصول الطلب للمكتبة</button>`;
+        }
+        if (st === "يحتاج إلى توضيح") {
+          btns += `<button class="btn btn-blue" onclick="promptOrderNote('${order.id}', 'طلب جديد', 'أضف التوضيح المطلوب لقاسم لإعادة تفعيل الطلب:')">✏️ إرسال التوضيح لقاسم</button>`;
+        }
+      }
+
+      return btns;
+    }
+
+    // تغيير حالة الطلب مع توثيق الوقت والشخص
+    function changeOrderStatus(orderId, newStatus, customNote = "") {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      order.status = newStatus;
+      order.history.push({
+        status: newStatus,
+        by: `${currentUser.defaultName}`,
+        time: getNowFormatted(),
+        note: customNote || `تم تحويل الحالة إلى (${newStatus})`
+      });
+
+      saveToStorage();
+      renderOrders();
+    }
+
+    function promptOrderNote(orderId, targetStatus, messagePrompt) {
+      const note = prompt(messagePrompt);
+      if (note === null || note.trim() === "") return;
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        order.notes = note.trim();
+        changeOrderStatus(orderId, targetStatus, note.trim());
+      }
+    }
+
+    // فتح نافذة طلب جديد
+    function openNewOrderModal() {
+      if (currentUser.role === "worker") {
+        document.getElementById("fBranch").value = currentUser.branch;
+        document.getElementById("fShift").value = currentUser.shift;
+      }
+      document.getElementById("fCreator").value = currentUser.defaultName;
+
+      // تعيين وقت تسليم افتراضي بعد 4 ساعات
+      const nextTime = new Date(Date.now() + 4 * 60 * 60 * 1000);
+      document.getElementById("fDueDate").value = nextTime.toISOString().slice(0, 16);
+
+      document.getElementById("newOrderModal").classList.add("active");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    // حفظ طلب جديد
+    function saveNewOrder(e) {
+      e.preventDefault();
+      const nextNum = 1025 + orders.length;
+      const newOrder = {
+        id: `PR-${nextNum}`,
+        title: document.getElementById("fTitle").value.trim(),
+        branch: document.getElementById("fBranch").value,
+        shift: document.getElementById("fShift").value,
+        creator: document.getElementById("fCreator").value.trim(),
+        priority: document.getElementById("fPriority").value,
+        grade: document.getElementById("fGrade").value,
+        workType: document.getElementById("fWorkType").value,
+        qty: document.getElementById("fQty").value + " نسخة",
+        printSpec: document.getElementById("fPrintSpec").value,
+        binding: document.getElementById("fBinding").value,
+        dueDate: document.getElementById("fDueDate").value,
+        fileLink: document.getElementById("fFileLink").value.trim() || "غير مرفق",
+        notes: document.getElementById("fNotes").value.trim(),
+        status: "طلب جديد",
+        createdAt: getNowFormatted(),
+        history: [
+          {
+            status: "طلب جديد",
+            by: `${document.getElementById("fCreator").value.trim()} (${document.getElementById("fBranch").value} - الشفت ${document.getElementById("fShift").value})`,
+            time: getNowFormatted(),
+            note: "تم إنشاء الطلب وإرساله لقاسم"
+          }
+        ]
+      };
+
+      orders.unshift(newOrder);
+      saveToStorage();
+      closeModal("newOrderModal");
+      document.getElementById("orderForm").reset();
+      renderOrders();
+    }
+
+    // عرض تفاصيل الطلب وسجل التغييرات الكامل
+    function openDetailsModal(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const historyHtml = order.history.map(h => `
+        <div class="timeline-item">
+          <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--color-yellow);">
+            <span>${h.status}</span>
+            <span style="color:var(--text-muted); font-size:0.75rem;">${h.time}</span>
+          </div>
+          <div style="font-size:0.8rem; color:#fff; margin-top:3px;">بواسطة: <strong>${h.by}</strong></div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${h.note}</div>
+        </div>
+      `).join("");
+
+      const cancelBtn = (currentUser.role === "admin" || currentUser.role === "qasim") && order.status !== "ملغي" && order.status !== "تم الاستلام"
+        ? `<button class="btn btn-red" onclick="promptOrderNote('${order.id}', 'ملغي', 'اذكر سبب إلغاء الطلب:'); closeModal('detailsModal');">✖ إلغاء الطلب</button>`
+        : "";
+
+      document.getElementById("detailsModalContent").innerHTML = `
+        <div class="modal-header">
+          <h2>تفاصيل الطلب رقم ${order.id}</h2>
+          <button class="btn btn-outline" onclick="closeModal('detailsModal')">إغلاق ✕</button>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <h3 style="color:#fff; margin-bottom:8px;">${order.title}</h3>
+          <div class="order-meta">
+            <div><span>المكتبة والشفت المسجّل:</span><strong>${order.branch} — الشفت ${order.shift}</strong></div>
+            <div><span>الموظف المسجّل:</span><strong>${order.creator}</strong></div>
+            <div><span>المرحلة الدراسية:</span><strong>${order.grade}</strong></div>
+            <div><span>نوع العمل:</span><strong>${order.workType}</strong></div>
+            <div><span>الكمية:</span><strong style="color:var(--color-yellow);">${order.qty}</strong></div>
+            <div><span>تفاصيل الطباعة:</span><strong>${order.printSpec}</strong></div>
+            <div><span>نوع التجليد:</span><strong>${order.binding}</strong></div>
+            <div><span>موعد التسليم المطلوب:</span><strong>${order.dueDate.replace('T', ' ')}</strong></div>
+            <div style="grid-column:1/-1;"><span>مسار الملف المرفق:</span><strong style="color:var(--color-blue);">${order.fileLink}</strong></div>
+          </div>
+        </div>
+
+        <h4 style="color:var(--color-yellow); margin: 16px 0 8px;">⏱️ سجل تتبع المراحل والمسؤوليات (لمنع ضياع الطلبات بين الشفتات):</h4>
+        <div class="timeline">${historyHtml}</div>
+
+        <div style="margin-top:20px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          ${cancelBtn}
+          <button class="btn btn-blue" onclick="copyOrderSummary('${order.id}')">📲 نسخ بطاقة الطلب للإرسال السريع</button>
+        </div>
+      `;
+
+      document.getElementById("detailsModal").classList.add("active");
+    }
+
+    function copyOrderSummary(orderId) {
+      const o = orders.find(x => x.id === orderId);
+      if (!o) return;
+      const text = `📌 *نظام سيف طلباتي*\nرقم الطلب: ${o.id}\nالحالة: ${o.status}\nالمكتبة: ${o.branch} (الشفت ${o.shift})\nالعنوان: ${o.title}\nالكمية: ${o.qty}\nالطباعة والتجليد: ${o.printSpec} | ${o.binding}\nالملف: ${o.fileLink}`;
+      navigator.clipboard.writeText(text);
+      alert("تم نسخ تفاصيل الطلب بنجاح!");
+    }
+
+    // تصدير واستيراد البيانات
+    function exportBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orders, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `saif-talabati-backup-${new Date().toISOString().slice(0,10)}.json`);
+      dlAnchor.click();
+    }
+
+    function importBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            orders = imported;
+            saveToStorage();
+            renderOrders();
+            alert("تم استيراد وتحديث سجل الطلبات بنجاح!");
+          }
+        } catch (err) {
+          alert("ملف غير صالح!");
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
